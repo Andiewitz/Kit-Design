@@ -5,8 +5,7 @@
   "type": "module",
   "workspaces": [
     "client/app",
-    "client/web",
-    "services"
+    "client/web"
   ],
   "engines": {
     "node": ">=22.23.4"
@@ -15,9 +14,24 @@
     "dev": "npm run dev:app",
     "dev:app": "npm run dev --workspace @kit/app",
     "dev:web": "npm run dev --workspace @kit/web",
-    "dev:services": "npm run dev --workspace @kit/services",
-    "build": "npm run build --workspaces --if-present",
-    "typecheck": "npm run typecheck --workspaces --if-present",
-    "lint": "npm run lint --workspaces --if-present"
+    "dev:user": "go -C services/user run ./cmd/api",
+    "dev:services": "npm run dev:user",
+    "build": "npm run build --workspaces --if-present && npm run build:user",
+    "build:user": "go -C services/user build -o bin/user ./cmd/api",
+    "typecheck": "npm run typecheck --workspaces --if-present && npm run vet:user",
+    "vet:user": "go -C services/user vet ./...",
+    "lint": "npm run lint --workspaces --if-present && npm run vet:user",
+    "test": "npm run test:user",
+    "test:unit:user": "go -C services/user test ./internal/...",
+    "test:user": "go -C services/user test ./...",
+    "test:int": "npm run test:int:user",
+    "test:int:user": "go -C tests test ./int/user/...",
+    "test:k6": "k6 run tests/k6/user-session.k6.js",
+    "db:up": "docker compose up -d db mailpit",
+    "db:down": "docker compose down",
+    "migrate:up": "go -C services/user run ./cmd/migrate up",
+    "migrate:down": "go -C services/user run ./cmd/migrate down",
+    "admin": "go -C services/user run ./cmd/admin",
+    "keygen": "go run ./services/user/cmd/keygen"
   }
 }
