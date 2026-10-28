@@ -1,0 +1,72 @@
+name: kit-design
+
+services:
+  db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: kit
+      POSTGRES_PASSWORD: kit_dev_password
+      POSTGRES_DB: kit
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - kit-postgres:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kit -d kit"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "127.0.0.1:1025:1025"
+      - "127.0.0.1:8025:8025"
+
+  migrate:
+    build:
+      context: .
+      dockerfile: services/user/Dockerfile
+    entrypoint: ["/app/migrate"]
+    command: ["up"]
+    environment:
+      DATABASE_URL: postgres://kit:kit_dev_password@db:5432/kit?sslmode=disable
+    depends_on:
+      db:
+        condition: service_healthy
+
+  user:
+    build:
+      context: .
+      dockerfile: services/user/Dockerfile
+    restart: unless-stopped
+    environment:
+      APP_ENV: development
+      PORT: "3001"
+      DATABASE_URL: postgres://kit:kit_dev_password@db:5432/kit?sslmode=disable
+      APP_ORIGIN: ${APP_ORIGIN:-http://localhost:5173}
+      PUBLIC_APP_URL: ${PUBLIC_APP_URL:-http://localhost:5173}
+      JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY:-}
+      JWT_KEY_ID: ${JWT_KEY_ID:-dev-1}
+      JWT_ISSUER: kit-user
+      JWT_AUDIENCE: kit-api
+      ACCESS_TOKEN_TTL: 15m
+      REFRESH_TOKEN_TTL: 720h
+      COOKIE_SECURE: "false"
+      MAILER: smtp
+      SMTP_ADDR: mailpit:1025
+      MAIL_FROM: no-reply@kit.local
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:-dev-internal-token-change-me}
+      RATE_LIMIT_ENABLED: "true"
+    ports:
+      - "127.0.0.1:3001:3001"
+    depends_on:
+      db:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  kit-postgres:

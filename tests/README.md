@@ -1,6 +1,6 @@
 # Tests
 
-All automated tests live here, separated by scope.
+All automated tests live here, separated by scope. Go integration tests share the `tests/go.mod` module; future client suites add their own runner.
 
 | Directory | Purpose |
 | --- | --- |
@@ -11,17 +11,25 @@ All automated tests live here, separated by scope.
 | [`failure`](failure/) | Dependency outage and resilience tests |
 | [`security`](security/) | Security behavior and scanning tests |
 
+## Current runners
+
+- Go unit tests live beside the code in `services/user`.
+- Go integration tests live in [`int/user`](int/user/).
+- k6 scripts are opt-in.
+
 ## Running tests
 
-No test runner is configured yet. As runners are added, expose one root script per category:
+```bash
+npm run test:unit:user   # Go unit tests
+npm run test:int:user    # PostgreSQL-backed HTTP integration tests
+npm run test:user        # all service unit tests
+```
+
+Integration tests require a migrated database:
 
 ```bash
-npm run test:unit
-npm run test:int
-npm run test:e2e
-npm run test:k6
-npm run test:failure
-npm run test:security
+npm run db:up
+npm run migrate:up
 ```
 
 Document tooling decisions and conventions in [`/docs/tests-docs`](../docs/tests-docs/).
@@ -32,3 +40,4 @@ Document tooling decisions and conventions in [`/docs/tests-docs`](../docs/tests
 - Do not depend on execution order or shared mutable state.
 - Never commit credentials, tokens, customer data, or production fixtures.
 - Keep load and failure tests opt-in; they should not run in the default fast suite.
+- Reset test data per suite and use a dedicated database for integration runs.

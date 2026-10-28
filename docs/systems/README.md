@@ -18,21 +18,27 @@ Architecture, ownership, and operational notes for each system in the repository
 - Stack: Astro 7
 - Responsibility: public website and content
 
-### @kit/services
+### User service
 
-- Location: `services`
-- Runtime: Node.js 22.23.4 or newer
-- Stack: TypeScript, native Node HTTP server
-- Responsibility: backend API surface
-- Health check: `GET /health` on port `3001` by default, configurable with `PORT`
+- Location: `services/user`
+- Runtime: Go 1.27.3
+- Stack: PostgreSQL 18, pgx, goose, Ed25519 JWT
+- Responsibility: identity, sessions, accounts, roles, audit events
+- Health checks: `GET /healthz`, `GET /readyz` on port `3001`
+- Documentation: [`user-service.md`](user-service.md)
 
 ## Dependency ownership
 
-Each workspace declares dependencies in its own `package.json`. npm hoists the installed tree to the root `node_modules` and records resolved versions in the root `package-lock.json`.
+- Client workspaces declare dependencies in their own `package.json`; npm hoists to the root `node_modules` and records versions in `package-lock.json`.
+- The Go service declares dependencies in `services/user/go.mod`; the test module declares its own in `tests/go.mod`.
+- `go.work` ties the service and test modules together for local development.
+- Container images are built from `services/user/Dockerfile` and run the compiled Go binaries.
 
 ## Adding a system
 
-1. Create the system directory with its own `package.json`.
-2. Add the directory to the `workspaces` array in the root `package.json`.
-3. Declare dependencies in that workspace, not at the root.
-4. Document the system here, including runtime, ownership, and health checks.
+1. Create the system directory with its own manifest and lockfile where applicable.
+2. For a Node workspace, add the directory to `workspaces` in the root `package.json`.
+3. For a Go module, add it to `go.work` and document its module path.
+4. Declare dependencies in that system, not at the repository root.
+5. Add a system document here with runtime, ownership, health checks, and failure behavior.
+6. Add tests in the matching `/tests` category and document commands.

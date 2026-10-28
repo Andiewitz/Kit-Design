@@ -1,21 +1,37 @@
 # Integration Tests
 
-Tests that exercise multiple parts of a system through real boundaries such as HTTP, the filesystem, or a database.
+Tests that exercise multiple parts of a system through real boundaries such as HTTP and a database.
+
+## Current suites
+
+- [`user`](user/) - Go HTTP integration tests for registration, verification, login, refresh rotation, recovery, accounts, admin roles, audit events, CSRF, and health checks.
 
 ## Rules
 
 - Use real adapters for the boundary under test.
 - Isolate data per run and clean up afterward.
 - Start required dependencies locally or in CI; do not rely on shared environments.
-- Assert observable behavior, not internal call sequences.
-- Name files `<system>-<behavior>.test.ts`.
+- Assert observable behavior through HTTP responses, not internal call sequences.
+- Name Go targets by system, for example `tests/int/user`.
 
-## Typical targets
+## Running
 
-- Services routes and error handling
-- Database queries and migrations, once persistence is added
-- Client data flows against a test API
+```bash
+npm run db:up
+npm run migrate:up
+npm run test:int:user
+```
 
-## Planned tooling
+Direct command:
 
-Vitest with per-suite setup. Add the runner and environment configuration before creating suites.
+```bash
+go -C tests test ./int/user/... -count=1
+```
+
+Use `TEST_DATABASE_URL` to isolate the run. The user-service harness truncates identity tables before each suite, so never point it at shared or production data.
+
+## Tooling
+
+- Go testing with `httptest` and a real PostgreSQL store.
+- Module path: `kitdesign/services/user/tests`.
+- Future client integration tests use Vitest once configured.

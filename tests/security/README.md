@@ -20,11 +20,26 @@ Automated checks for security behavior and regressions.
 - Keep scanner output free of live credentials.
 - Track every finding as an issue with severity and owner.
 
+## Current coverage
+
+The user-service integration suite covers:
+
+- CSRF origin rejection on state-changing requests.
+- Role and permission boundaries for account and admin routes.
+- Generic credential errors and duplicate-registration masking.
+- Refresh-token replay and family revocation.
+- Password-reset token reuse rejection.
+- Internal service token rejection.
+- Security headers, CORS, and rate-limit responses.
+
+Run it with `npm run test:int:user`.
+
 ## Baseline checks
 
 - `npm audit` in CI, with an explicit policy for accepted advisories
+- `govulncheck ./...` in `services/user` and `tests`
 - Secret scanning on every pull request
 - Dependency review for new packages
 - Authentication and authorization tests for every protected route
 
-No security runner is configured yet.
+`govulncheck` and secret scanning are not wired into CI yet.

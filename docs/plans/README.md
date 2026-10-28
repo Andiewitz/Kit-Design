@@ -14,4 +14,8 @@ Use this directory for design and implementation plans before significant work b
 - done
 - abandoned
 
+## Current plans
+
+- [User service](2026-10-27-user-service.md) - registration, login, accounts, authorization
+
 Start from [`_template.md`](_template.md). Update the plan as decisions change rather than creating parallel documents.
