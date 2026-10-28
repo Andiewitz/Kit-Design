@@ -14,7 +14,10 @@ Tests that drive complete user flows through the running applications, including
 
 - App loads and completes its primary workflow
 - Website navigation and key content pages
-- Service-backed actions succeed and surface errors clearly
+- Registration, email verification, login, and logout
+- Password recovery through an emailed link
+- Account profile and session management
+- Admin user status and role changes
 
 ## Planned tooling
 

@@ -21,6 +21,14 @@ Tests for what happens when dependencies fail or the runtime degrades. These are
 - Emit actionable logs and metrics
 - Recover automatically when the dependency returns
 
+## Current coverage
+
+- Outbox delivery failure retry and backoff (unit test).
+- Refresh-token rotation race and family revocation (integration test).
+- Invalid or reused verification and reset tokens (unit and integration tests).
+- Suspended account login rejection (integration test).
+- Readiness failure is implemented in `GET /readyz`; automate the database-down case.
+
 ## Rules
 
 - Run in isolated environments with disposable data.
